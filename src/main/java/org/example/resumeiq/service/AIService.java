@@ -46,7 +46,7 @@ public class AIService {
             "Matched skills: %s\n" +
             "Missing skills: %s\n\n" +
             "Provide a concise analysis with:\n" +
-            "1. Professional Summary (2-3 sentences about the candidate fit)\n" +
+            "1. Professional Summary (exactly 5 sentences covering: who the candidate is, their core strengths, their experience level, how well they fit this role, and one piece of forward-looking advice)\n" +
             "2. Key Strengths (bullet points related to the job)\n" +
             "3. Skill Gap Recommendations (specific actionable advice for each missing skill " +
             "- suggest courses, projects, or certifications)\n" +
