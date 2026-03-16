@@ -10,5 +10,4 @@ public class ResumeResponse {
     private Double matchScore;
     private List<String> matchedSkills;
     private List<String> missingSkills;
-    private String aiAnalysis;
 }

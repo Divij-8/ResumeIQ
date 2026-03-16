@@ -1,121 +1,5 @@
 import React from 'react';
 
-// Lightweight markdown → JSX renderer (no deps needed)
-const renderMarkdown = (text) => {
-  if (!text) return null;
-  const lines = text.split('\n');
-  const elements = [];
-  let i = 0;
-
-  const parseInline = (str) => {
-    const parts = [];
-    let remaining = str;
-    let key = 0;
-    while (remaining.length > 0) {
-      const boldMatch = remaining.match(/^(.*?)\*\*(.+?)\*\*(.*)/s);
-      const italicMatch = remaining.match(/^(.*?)_(.+?)_(.*)/s);
-      const codeMatch = remaining.match(/^(.*?)`(.+?)`(.*)/s);
-      if (boldMatch && (!italicMatch || boldMatch[1].length <= italicMatch[1].length) && (!codeMatch || boldMatch[1].length <= codeMatch[1].length)) {
-        if (boldMatch[1]) parts.push(<span key={key++}>{boldMatch[1]}</span>);
-        parts.push(<strong key={key++} className="font-semibold text-white">{boldMatch[2]}</strong>);
-        remaining = boldMatch[3];
-      } else if (italicMatch && (!codeMatch || italicMatch[1].length <= codeMatch[1].length)) {
-        if (italicMatch[1]) parts.push(<span key={key++}>{italicMatch[1]}</span>);
-        parts.push(<em key={key++} className="italic text-purple-200">{italicMatch[2]}</em>);
-        remaining = italicMatch[3];
-      } else if (codeMatch) {
-        if (codeMatch[1]) parts.push(<span key={key++}>{codeMatch[1]}</span>);
-        parts.push(<code key={key++} className="bg-white/10 px-1.5 py-0.5 rounded text-sm font-mono text-yellow-200">{codeMatch[2]}</code>);
-        remaining = codeMatch[3];
-      } else {
-        parts.push(<span key={key++}>{remaining}</span>);
-        break;
-      }
-    }
-    return parts;
-  };
-
-  while (i < lines.length) {
-    const line = lines[i];
-    const trimmed = line.trim();
-
-    if (!trimmed) { elements.push(<div key={i} className="h-3" />); i++; continue; }
-
-    if (trimmed.startsWith('### ')) {
-      elements.push(
-        <h3 key={i} className="text-base font-bold text-yellow-300 uppercase tracking-widest mt-5 mb-2 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" />
-          {trimmed.slice(4)}
-        </h3>
-      );
-      i++; continue;
-    }
-    if (trimmed.startsWith('## ')) {
-      elements.push(
-        <h2 key={i} className="text-lg font-bold text-white mt-6 mb-3 border-b border-white/20 pb-1">
-          {trimmed.slice(3)}
-        </h2>
-      );
-      i++; continue;
-    }
-    if (trimmed.startsWith('# ')) {
-      elements.push(
-        <h1 key={i} className="text-xl font-extrabold text-white mt-4 mb-3">{trimmed.slice(2)}</h1>
-      );
-      i++; continue;
-    }
-
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-      const items = [];
-      while (i < lines.length && (lines[i].trim().startsWith('- ') || lines[i].trim().startsWith('* '))) {
-        items.push(
-          <li key={i} className="flex items-start gap-2 text-white/90 text-sm leading-relaxed">
-            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-purple-300 flex-shrink-0" />
-            <span>{parseInline(lines[i].trim().slice(2))}</span>
-          </li>
-        );
-        i++;
-      }
-      elements.push(<ul key={`ul-${i}`} className="space-y-1.5 my-2 ml-1">{items}</ul>);
-      continue;
-    }
-
-    const numberedMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
-    if (numberedMatch) {
-      const num = parseInt(numberedMatch[1]);
-      const items = [];
-      let j = i;
-      while (j < lines.length && lines[j].trim().match(/^\d+\.\s+/)) {
-        const m = lines[j].trim().match(/^(\d+)\.\s+(.*)/);
-        items.push(
-          <li key={j} className="flex items-start gap-3 text-white/90 text-sm leading-relaxed">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-purple-200">
-              {parseInt(lines[j].trim().match(/^(\d+)/)[1])}
-            </span>
-            <span className="pt-0.5">{parseInline(m[2])}</span>
-          </li>
-        );
-        j++;
-      }
-      elements.push(<ol key={`ol-${i}`} className="space-y-2 my-3 ml-1">{items}</ol>);
-      i = j;
-      continue;
-    }
-
-    if (trimmed === '---' || trimmed === '***') {
-      elements.push(<hr key={i} className="border-white/20 my-4" />);
-      i++; continue;
-    }
-
-    elements.push(
-      <p key={i} className="text-white/85 text-sm leading-relaxed">{parseInline(trimmed)}</p>
-    );
-    i++;
-  }
-
-  return elements;
-};
-
 const ScoreRing = ({ score }) => {
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
@@ -151,7 +35,7 @@ const ScoreRing = ({ score }) => {
 
 
 const ResultDashboard = ({ result, onReset }) => {
-  const { matchScore, matchedSkills, missingSkills, aiAnalysis } = result;
+  const { matchScore, matchedSkills, missingSkills } = result;
 
   return (
     <div className="min-h-screen bg-[#0f0f1a] text-white">
@@ -166,7 +50,7 @@ const ResultDashboard = ({ result, onReset }) => {
             <h1 className="text-3xl font-extrabold tracking-tight text-white">
               Resume <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">Analysis</span>
             </h1>
-            <p className="text-sm text-gray-400 mt-1">Powered by ResumeIQ AI · Results ready</p>
+            <p className="text-sm text-gray-400 mt-1">Results ready</p>
           </div>
           <button
             onClick={onReset}
@@ -289,54 +173,6 @@ const ResultDashboard = ({ result, onReset }) => {
               : <div className="flex items-center gap-2 text-emerald-400 text-sm font-semibold">
                   <span>🎉</span> You matched every required skill!
                 </div>}
-          </div>
-        </div>
-
-        {/* AI Analysis — always shown */}
-        <div id="ai-full-report" className="rounded-2xl overflow-hidden border border-violet-500/30 shadow-2xl shadow-violet-900/20">
-          {/* Header bar */}
-          <div className="bg-gradient-to-r from-violet-600/80 to-blue-600/80 backdrop-blur-sm px-6 py-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-white">ResumeIQ AI Analysis</h2>
-              <p className="text-xs text-violet-200">Generated by ResumeIQ AI · Full Report</p>
-            </div>
-          </div>
-          {/* Content */}
-          <div className="bg-gradient-to-br from-[#1a1030] to-[#0d1428] px-6 py-5">
-            {aiAnalysis ? (
-              <div className="prose prose-invert max-w-none space-y-1">
-                {renderMarkdown(aiAnalysis)}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 gap-4 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
-                  <svg className="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-base mb-1">AI Summary Unavailable</p>
-                  <p className="text-gray-400 text-sm max-w-md leading-relaxed">
-                    The Gemini API key is missing or invalid. Add a valid key to{' '}
-                    <code className="text-violet-300 bg-white/10 px-1.5 py-0.5 rounded text-xs">application.properties</code>{' '}
-                    and restart the backend to enable AI summaries.
-                  </p>
-                  <a
-                    href="https://aistudio.google.com/app/apikey"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors"
-                  >
-                    Get a free Gemini API key →
-                  </a>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

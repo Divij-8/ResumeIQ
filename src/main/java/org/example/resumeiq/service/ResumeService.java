@@ -23,7 +23,6 @@ public class ResumeService {
 
     private final JobRoleRepository jobRoleRepository;
     private final ResumeAnalysisRepository resumeAnalysisRepository;
-    private final AIService aiService;
 
     @Transactional
     public ResumeResponse analyzeResume(ResumeRequest request) {
@@ -55,21 +54,6 @@ public class ResumeService {
         double matchScore = requiredSkills.isEmpty() ? 0.0 :
                 (matchedSkills.size() / (double) requiredSkills.size()) * 100.0;
 
-        // AI-powered analysis via Gemini
-        String aiAnalysis = null;
-        try {
-            aiAnalysis = aiService.analyzeResumeWithAI(
-                    request.getResumeText(),
-                    jobRole.getName(),
-                    jobRole.getRequiredSkills(),
-                    matchedSkills,
-                    missingSkills,
-                    matchScore
-            );
-        } catch (Exception e) {
-            log.warn("AI analysis unavailable: {}", e.getMessage());
-        }
-
         // Save resume analysis to database
         ResumeAnalysis analysis = new ResumeAnalysis();
         analysis.setJobRole(jobRole);
@@ -78,7 +62,7 @@ public class ResumeService {
         analysis.setMissingSkills(String.join(", ", missingSkills));
         resumeAnalysisRepository.save(analysis);
 
-        // Return response
-        return new ResumeResponse(matchScore, matchedSkills, missingSkills, aiAnalysis);
+        // Return response without AI analysis
+        return new ResumeResponse(matchScore, matchedSkills, missingSkills);
     }
 }

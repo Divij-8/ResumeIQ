@@ -1,25 +1,23 @@
-# ResumeIQ — AI-Powered Resume Analyzer
+# ResumeIQ — Resume Analyzer
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk" />
   <img src="https://img.shields.io/badge/Spring_Boot-3.x-brightgreen?style=for-the-badge&logo=springboot" />
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=for-the-badge&logo=tailwindcss" />
-  <img src="https://img.shields.io/badge/Google_Gemini-AI-4285F4?style=for-the-badge&logo=google" />
 </p>
 
-> Upload your resume, pick a job role, and get an instant AI-powered analysis — match score, skill gaps, and a full professional summary — all in under 10 seconds.
+> Upload your resume, pick a job role, and get an instant analysis — match score and skill gaps — all in seconds.
 
 ---
 
 ## ✨ Features
 
-- **AI-Powered Analysis** — Google Gemini generates a 5-point professional summary, key strengths, skill gap recommendations, and an overall verdict
 - **Match Score** — Percentage score showing how well your resume aligns with the target role
 - **Skill Gap Detection** — Clearly highlights which skills you have and which you're missing
-- **PDF & Text Support** — Upload a PDF directly or paste resume text
-- **14 Job Roles** — Covers full stack, data, AI, cloud, DevOps and systems tracks
-- **Clean Dashboard** — Score ring, skill badges, coverage breakdown bar, and full AI report
+- **Text Support** — Paste resume text directly
+- **14 Job Roles** — Covers full stack, data, cloud, DevOps and systems tracks
+- **Clean Dashboard** — Score ring, skill badges, and coverage breakdown
 
 ---
 
@@ -27,11 +25,9 @@
 
 | Layer | Technologies |
 |---|---|
-| **Backend** | Java 21, Spring Boot, Spring Data JPA, Spring WebFlux (WebClient), Lombok |
+| **Backend** | Java 21, Spring Boot, Spring Data JPA, Lombok |
 | **Frontend** | React 18, Tailwind CSS, Axios |
 | **Database** | H2 in-memory (zero config — works out of the box) |
-| **AI** | Google Gemini 2.0 Flash (REST API) |
-| **PDF Parsing** | Apache PDFBox |
 
 ---
 
@@ -62,29 +58,21 @@
 
 - Java 21+
 - Node.js 18+ & npm
-- A free Gemini API key → [Get one here](https://aistudio.google.com/app/apikey)
 
 > **No database setup needed** — the app uses H2 in-memory database, everything runs out of the box.
 
 ---
 
-### 1. Clone the repository
+### Local Development
+
+#### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Divij-8/ResumeIQ.git
 cd ResumeIQ
 ```
 
-### 2. Configure your Gemini API key
-
-Open `src/main/resources/application.properties` and set:
-
-```properties
-gemini.api.key=YOUR_GEMINI_API_KEY_HERE
-gemini.model=gemini-2.0-flash
-```
-
-### 3. Start the backend
+#### 2. Start the backend
 
 ```bash
 ./mvnw spring-boot:run
@@ -92,7 +80,7 @@ gemini.model=gemini-2.0-flash
 
 Backend runs on **http://localhost:8080**
 
-### 4. Start the frontend
+#### 3. Start the frontend
 
 ```bash
 cd frontend
@@ -104,22 +92,70 @@ Frontend runs on **http://localhost:3000**
 
 ---
 
+## 🚀 Deploy to Render
+
+### Prerequisites for Render
+- A Render account (sign up at https://render.com)
+- GitHub repository with this code
+
+### Deployment Steps
+
+1. **Push to GitHub**
+   ```bash
+   git push origin main
+   ```
+
+2. **Create a Web Service on Render**
+   - Go to https://dashboard.render.com
+   - Click "New +" → "Web Service"
+   - Connect your GitHub repository
+   - Configure:
+     - **Name**: `resumeiq` (or your preferred name)
+     - **Environment**: `Java 21`
+     - **Build Command**: `./mvnw clean package -DskipTests`
+     - **Start Command**: Already set in `Procfile`
+     - **Plan**: Free tier works fine
+
+3. **Deploy**
+   - Click "Create Web Service"
+   - Render will automatically build and deploy your app
+   - Your app will be live at `https://resumeiq.onrender.com` (or similar)
+
+4. **Update Frontend API URL** (if needed)
+   - If your frontend is deployed separately, update `frontend/src/api/axios.js` to point to your Render backend URL
+   - Or deploy frontend as a static site on Render
+
+### Full Stack Deployment on Render
+
+To deploy both backend and frontend together:
+
+1. **Build the frontend** and include it in the JAR:
+   ```bash
+   cd frontend
+   npm install
+   npm run build
+   cd ..
+   ```
+
+2. **The Spring Boot app will serve the built frontend** from the `src/main/resources/static/` directory
+
+3. Push to GitHub and deploy as described above
+
 ## 📁 Project Structure
 
 ```
 ResumeIQ/
 ├── src/main/java/org/example/resumeiq/
 │   ├── ResumeIqApplication.java     # App entry point + job role seed data
-│   ├── config/                      # WebClient config
 │   ├── controller/                  # REST API endpoints
 │   ├── dto/                         # Request / Response DTOs
 │   ├── entity/                      # JPA entities (JobRole, ResumeAnalysis)
 │   ├── repository/                  # Spring Data repositories
 │   └── service/
-│       ├── ResumeService.java       # Skill matching logic
-│       └── AIService.java           # Gemini AI integration
+│       └── ResumeService.java       # Skill matching logic
 ├── src/main/resources/
 │   └── application.properties
+├── Procfile                         # Render deployment config
 └── frontend/
     └── src/components/
         ├── HomePage.js              # Landing page
@@ -137,7 +173,6 @@ ResumeIQ/
 |---|---|---|
 | `GET` | `/api/jobroles` | List all available job roles |
 | `POST` | `/api/analyze` | Analyze resume text |
-| `POST` | `/api/upload` | Analyze uploaded PDF resume |
 
 ### Example — Analyze resume text
 
@@ -153,8 +188,7 @@ curl -X POST http://localhost:8080/api/analyze \
 {
   "matchScore": 80.0,
   "matchedSkills": ["Java", "Spring Boot", "REST API", "MySQL"],
-  "missingSkills": ["Redis", "Microservices"],
-  "aiAnalysis": "The candidate demonstrates strong backend fundamentals..."
+  "missingSkills": ["Redis", "Microservices"]
 }
 ```
 
@@ -176,4 +210,4 @@ MIT License — feel free to use, modify, and distribute.
 
 ---
 
-<p align="center">Built with ❤️ using Spring Boot + React + Google Gemini AI</p>
+<p align="center">Built with ❤️ using Spring Boot + React</p>
